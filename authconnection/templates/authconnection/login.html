@@ -1,0 +1,16 @@
+{% extends 'authconnection/base.html' %}
+{% load static %}
+
+{% block content %}
+<body>
+    <div class="text-center">
+    <form action="{% url 'login' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+        </form>
+    </div>
+{% endblock %}
+
+</body>
+
