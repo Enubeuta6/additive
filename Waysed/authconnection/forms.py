@@ -16,7 +16,7 @@ class RegisterUserForm(UserCreationForm):
 class LoginAccess(forms.ModelForm):
     class Meta:
         model = UserDataMeta
-        fields = 'password',
+        fields = ['password', 'username']
 
 class Generate(forms.ModelForm):
     class Meta:

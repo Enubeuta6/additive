@@ -12,13 +12,13 @@ class UserDataMeta(AbstractUser):
 
 
     REQUIRED_FIELDS = ['email',]
-    USERNAME_FIELD = 'login'
+    USERNAME_FIELD = 'username'
     is_anonymous = False
     is_authenticated = True
 
 
     def __str__(self):
-        return self.login
+        return self.username
 
 
 class PromocodeData(models.Model):
