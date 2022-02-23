@@ -1,0 +1,36 @@
+{% extends 'authconnection/base.html' %}
+{% block interractive %}
+        <div class="text-end">
+          {% if user.is_authenticated %}
+          <a type="button" href="{% url 'generate' %}" class="btn btn-warning">Generate Promo</a>
+          <a type="button" href="{% url 'logout' %}" class="btn btn-warning">Logout</a>
+          {% else %}
+          <a type="button" href="{% url 'login' %}" class="btn btn-warning">Login</a>
+          <a type="button" href="{% url 'register' %}" class="btn btn-warning">Sign-up</a>
+          {% endif %}
+        {% endblock %}
+{% block content %}
+<body>
+    <div class="container d-flex justify-content-center mt-5">
+    <div class="card-custom">
+        <div class="top-container">
+            <div class="ml-3">
+                <h5 class="name">{{ user.username }}</h5>
+                <p class="mail">{{ user.email }}</p>
+            </div>
+        </div>
+        <div class="middle-container d-flex justify-content-between align-items-center mt-3 p-2">
+            <div class="dollar-div px-3">
+                <div class="round-div"><i class="fa fa-dollar dollar"></i></div>
+            </div>
+            <div class="d-flex flex-column text-right mr-2"> <span class="current-balance">Current Balance</span>
+                <span class="amount"><span class="dollar-sign ">$</span>{{ user.credit }}</span> </div>
+        </div>
+        <div class="recent-border mt-4"> <span class="recent-orders">...</span> </div>
+        <div class="wishlist-border pt-2"> <span class="wishlist">...</span> </div>
+        <div class="fashion-studio-border pt-2"> <span class="fashion-studio">...</span> </div>
+    </div>
+</div>
+{% endblock %}
+
+</body>

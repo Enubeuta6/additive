@@ -5,13 +5,11 @@ from django.db import models
 
 class UserDataMeta(AbstractUser):
 
-
-    email = models.EmailField(max_length=254, null=True)
-    selectorpromo = models.ForeignKey('PromocodeData', on_delete=models.CASCADE, null=True)
     credit = models.IntegerField(default=0)
 
 
-    REQUIRED_FIELDS = ['email',]
+
+    REQUIRED_FIELDS = []
     USERNAME_FIELD = 'username'
     is_anonymous = False
     is_authenticated = True
@@ -21,9 +19,10 @@ class UserDataMeta(AbstractUser):
         return self.username
 
 
-class PromocodeData(models.Model):
-    promoCode = models.TextField(max_length=32)
-    linkedTo = models.CharField(max_length=32)
+class PromoDataMeta(models.Model):
+    code_key = models.CharField(max_length=32)
+    linkedto = models.ForeignKey('UserDataMeta', on_delete=models.CASCADE, null=True,)
+
 
     def __str__(self):
-        return self.promoCode
+        return self.code_key

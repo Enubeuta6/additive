@@ -1,40 +1,64 @@
+from django.contrib.auth import logout, login
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, request
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, TemplateView, DetailView, ListView
+from django.contrib.auth.views import LoginView
+
 
 from .forms import *
 from .models import *
-from .utils import DataMixin
+from .utils import DataMixin, AnonymousRequiredMixin
 
 
-class Index(TemplateView):
-
-    template_name = "index.html"
+class Index(DataMixin ,TemplateView):
+    model = UserDataMeta
+    template_name = "authconnection/index.html"
+    context_object_name = 'dbData'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['menu'] = UserDataMeta.objects.all()[:5]
         return context
 
-def login(request):
-    if request.method == 'POST':
-        form = LoginAccess(request.POST)
-        if form.is_valid():
-            try:
-                return redirect('index')
-            except:
-                form.add.error(None, 'Error Invidalid Data')
-    else:
-        form = LoginAccess()
-    return render(request, 'authconnection/login.html', {'form': form}, )
+
+class Profile(LoginRequiredMixin, DataMixin, ListView):
+        template_name = 'authconnection/profile.html'
+        model = UserDataMeta
+
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            c_def = self.get_user_context(title="Profile")
+            return dict(list(context.items()) + list(c_def.items()))
+
+
+class LoginUser(AnonymousRequiredMixin ,DataMixin, LoginView):
+        form_class = LoginUserForm
+        template_name = 'authconnection/login.html'
+        redirect_authenticated_user = 'index'
+
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            c_def = self.get_user_context(title="Authorization")
+            return dict(list(context.items()) + list(c_def.items()))
+
+        def get_success_url(self):
+            return reverse_lazy('index')
+
+
+
 
 class generatepromo(LoginRequiredMixin ,DataMixin ,CreateView):
+    model = PromoDataMeta
     form_class = Generate
     template_name = 'authconnection/generate.html'
     success_url = reverse_lazy('index')
     login_url = reverse_lazy ('login')
+
+
     #raise_exception = True
     def get_context_data(self, *, objects_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -43,31 +67,28 @@ class generatepromo(LoginRequiredMixin ,DataMixin ,CreateView):
 
 
 
-class RegisterUser(DataMixin, CreateView):
-
-    form_class = RegisterUserForm
-    template_name = 'authconnection/register.html'
-    success_url = reverse_lazy('login')
-
-    def get_context_data(self, *,  object_list=None,**kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title="Register")
-        return dict(list(context.items()) + list(c_def.items()))
+def logout_user(request):
+    logout(request)
+    return redirect('login')
 
 
+class RegisterUser(AnonymousRequiredMixin, DataMixin, CreateView):
+        redirect_authenticated_user = 'index'
+        form_class = RegisterUserForm
+        template_name = 'authconnection/register.html'
+        success_url = reverse_lazy('login')
 
-# def register(request):
-#     if request.method == 'POST':
-#         form = Register(request.POST)
-#         if form.is_valid():
-#             try:
-#                 form.save()
-#                 return redirect('index')
-#             except:
-#                 form.add.error(None, 'Error Invidalid Data')
-#     else:
-#         form = Register()
-#     return render(request, 'authconnection/register.html', {'form': form},)
+        def get_context_data(self, *,  object_list=None,**kwargs):
+            context = super().get_context_data(**kwargs)
+            c_def = self.get_user_context(title="Register")
+            return dict(list(context.items()) + list(c_def.items()))
+
+
+        def form_valid(self, form):
+            user = form.save()
+            login(self.request, user)
+            return redirect('index')
+
 
 def pageNotFound(request, exceptions):
     return HttpResponseNotFound('Page not found 404')
